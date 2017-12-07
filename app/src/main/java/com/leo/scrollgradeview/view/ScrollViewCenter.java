@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 
 public class ScrollViewCenter extends View {
     public ScrollViewCenter(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -21,7 +22,6 @@ public class ScrollViewCenter extends View {
         super(context);
         init();
     }
-    private int center = getResources().getDisplayMetrics().widthPixels/2;
     private Paint mPaint;
     private ViewBean mVBG = new ViewBean();
     private void init() {
@@ -36,6 +36,12 @@ public class ScrollViewCenter extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawLine(center,mVBG.startY,center,mVBG.endY, mPaint);
+        canvas.drawLine(getWidth()/2,mVBG.startY - 20,getWidth()/2,mVBG.endY, mPaint);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+        setMeasuredDimension(10, 200);
     }
 }

@@ -7,6 +7,8 @@ import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import static com.leo.scrollgradeview.view.Constants.DDX;
+
 public class ScrollViewGroup extends FrameLayout {
     public ScrollViewGroup(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -21,20 +23,23 @@ public class ScrollViewGroup extends FrameLayout {
         init();
     }
     private TextView mTextView;
-    private ScrollView mScrollView;
     private void init() {
         mTextView = new TextView(getContext());
         mTextView.setText("0.0");
         LayoutParams params = new LayoutParams(-2,-2, Gravity.CENTER_HORIZONTAL);
         params.topMargin = 10;
         addView(mTextView,params);
-        mScrollView = new ScrollView(getContext(),new ScrollView.OnScrollListener() {
+        addView(new ScrollView(getContext(),new ScrollView.OnScrollListener() {
             @Override
             public void onScroll(int index) {
-                mTextView.setText(index/10 + "." +index%10);
+                mTextView.setText(index/DDX + "." +index%DDX);
             }
-        });
-        addView(mScrollView);
-        addView(new ScrollViewCenter(getContext()));
+        }));
+        addView(new ScrollViewCenter(getContext()), params);
+
+    }
+
+    public String getSelectedValue(){
+        return mTextView.getText().toString();
     }
 }

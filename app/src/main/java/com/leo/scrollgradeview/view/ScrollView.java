@@ -11,6 +11,10 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+import static com.leo.scrollgradeview.view.Constants.DDX;
+import static com.leo.scrollgradeview.view.Constants.DX;
+import static com.leo.scrollgradeview.view.Constants.NUMBERS;
+
 /**
  * Created by nannan on 2017/11/9.
  */
@@ -27,7 +31,6 @@ public class ScrollView extends View {
 
     private ViewBean mVBG = new ViewBean();
     private ViewBean mVBR = new ViewBean();
-    private int center = getResources().getDisplayMetrics().widthPixels/2;
     private float density = getResources().getDisplayMetrics().density;
     private void init() {
         mPaint = new Paint();
@@ -73,21 +76,26 @@ public class ScrollView extends View {
                     public void run() {
                         Message message = mHandler.obtainMessage();
                         message.what = MSG_FLING;
-                        message.arg1 = (int) velocityX/20;
+                        message.arg1 = (int) velocityX/20;//速度太大, 变小20倍
                         mHandler.sendMessage(message);
                     }
                 }.start();
                 return true;
             }
         });
-
-        mVBG.endY = mVBG.startY + 50;
+        mVBG.endY = mVBG.startY + 50;// 50 大刻度的长度
         mVBG.color = Color.GREEN;
-        mVBR.endY = mVBR.startY + 30;
+        mVBR.endY = mVBR.startY + 30;// 30 小刻度的长度
         //move(40*dx*10);//TODO 初始化位置 40.0
     }
-    private int move;
+    private int move;//总偏移量
     private boolean stop = true;
+
+    /**
+     *
+     * @param distanceX 手指滑动的距离
+     * @return true: 限制当前方向滑动(滑动到两端时)
+     */
     private boolean move(int distanceX){
         int tmp = move + distanceX;
         boolean stop = false;
@@ -109,10 +117,13 @@ public class ScrollView extends View {
         return stop;
     }
 
+    /**
+     * 停止滑动
+     */
     private void up(){
         int i = move % dx;
-        int i1 = i - dx/2;
-        if(i1 < 0){
+        //自动吸附
+        if(i < dx/2){//在两个刻度中间, 偏左边
             move -= i;
             scrollBy(-i, 0);
         }else {
@@ -125,8 +136,8 @@ public class ScrollView extends View {
             mListener.onScroll(move/dx);
         }
     }
-    private int len = 1001;
-    private int dx = 20;
+    private int len = NUMBERS;//总刻度数
+    private int dx = DX;//两个刻度之间的距离 px
     private static final int MSG_FLING = 100;
     private Handler mHandler = new Handler(){
         @Override
@@ -142,7 +153,7 @@ public class ScrollView extends View {
                 }
                 Message message = mHandler.obtainMessage();
                 message.what = MSG_FLING;
-                message.arg1 = (int) (arg1/1.1);
+                message.arg1 = (int) (arg1/1.1);//速度每次减小1.1倍
                 mHandler.sendMessageDelayed(message,20);
             }
         }
@@ -159,12 +170,15 @@ public class ScrollView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        int distance = center;
+        int distance = getWidth()/2;
         for(int i = 0; i < len; i++){
-            if(i%10 == 0) {
+            if(i%DDX == 0) {
                 mPaint.setColor(mVBG.color);
-                canvas.drawText(i/10 + "", distance,mVBG.endY + 50, mPaint);
+                canvas.drawText(i/DDX + "", distance,mVBG.endY + 50, mPaint);
                 canvas.drawLine(distance,mVBG.startY,distance,mVBG.endY, mPaint);
+            } else if(i%(DDX/2) == 0) {
+                mPaint.setColor(mVBR.color);
+                canvas.drawLine(distance,mVBG.startY,distance,mVBG.endY - 10, mPaint);
             } else {
                 mPaint.setColor(mVBR.color);
                 canvas.drawLine(distance,mVBR.startY,distance,mVBR.endY, mPaint);
